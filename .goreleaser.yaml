@@ -65,7 +65,7 @@ nfpms:
     file_name_template: >-
       {{ .PackageName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}
     homepage: https://github.com/dougmb/rcss
-    maintainer: Douglas <dougmbs@gmail.com>
+    maintainer: dougmb <16156395+dougmb@users.noreply.github.com>
     description: Terminal UI and headless CLI for per-project backups to an rclone cloud remote.
     license: MIT
     formats:
@@ -92,7 +92,7 @@ aurs:
     homepage: https://github.com/dougmb/rcss
     description: Terminal UI and headless CLI for per-project backups to an rclone cloud remote
     maintainers:
-      - Douglas <dougmbs at gmail dot com>
+      - dougmb <16156395+dougmb at users dot noreply dot github dot com>
     license: MIT
     private_key: "{{ .Env.AUR_KEY }}"
     git_url: ssh://aur@aur.archlinux.org/rcss-bin.git
@@ -108,8 +108,8 @@ aurs:
       install -Dm644 "./LICENSE" "${pkgdir}/usr/share/licenses/rcss/LICENSE"
       install -Dm644 "./README.md" "${pkgdir}/usr/share/doc/rcss/README.md"
     commit_author:
-      name: Douglas
-      email: dougmbs@gmail.com
+      name: dougmb
+      email: 16156395+dougmb@users.noreply.github.com
 
 # AUR: build-from-source package.
 aur_sources:
@@ -117,7 +117,7 @@ aur_sources:
     homepage: https://github.com/dougmb/rcss
     description: Terminal UI and headless CLI for per-project backups to an rclone cloud remote
     maintainers:
-      - Douglas <dougmbs at gmail dot com>
+      - dougmb <16156395+dougmb at users dot noreply dot github dot com>
     license: MIT
     private_key: "{{ .Env.AUR_KEY }}"
     git_url: ssh://aur@aur.archlinux.org/rcss.git
@@ -147,8 +147,8 @@ aur_sources:
       install -Dm644 "./LICENSE" "${pkgdir}/usr/share/licenses/rcss/LICENSE"
       install -Dm644 "./README.md" "${pkgdir}/usr/share/doc/rcss/README.md"
     commit_author:
-      name: Douglas
-      email: dougmbs@gmail.com
+      name: dougmb
+      email: 16156395+dougmb@users.noreply.github.com
 
 # Homebrew (macOS/Linux): cask in dougmb/homebrew-tap.
 homebrew_casks:
@@ -166,8 +166,8 @@ homebrew_casks:
       token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
     skip_upload: '{{ if index .Env "HOMEBREW_TAP_TOKEN" }}false{{ else }}true{{ end }}'
     commit_author:
-      name: Douglas
-      email: dougmbs@gmail.com
+      name: dougmb
+      email: 16156395+dougmb@users.noreply.github.com
     hooks:
       post:
         install: |
@@ -189,8 +189,8 @@ scoops:
       token: "{{ .Env.SCOOP_BUCKET_TOKEN }}"
     skip_upload: '{{ if index .Env "SCOOP_BUCKET_TOKEN" }}false{{ else }}true{{ end }}'
     commit_author:
-      name: Douglas
-      email: dougmbs@gmail.com
+      name: dougmb
+      email: 16156395+dougmb@users.noreply.github.com
 
 changelog:
   sort: asc

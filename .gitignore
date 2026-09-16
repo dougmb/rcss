@@ -30,5 +30,8 @@ backup.env
 *.swp
 *~
 .DS_Store
+# Local agent notes and planning docs (not published)
 CLAUDE.md
 AGENTS.md
+plan.md
+.claude/
