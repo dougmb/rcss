@@ -20,13 +20,21 @@ const (
 
 // readCrontab returns the user's current crontab, or "" if none exists.
 func readCrontab() (string, error) {
-	out, err := exec.Command("crontab", "-l").Output()
+	cmd := exec.Command("crontab", "-l")
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+	out, err := cmd.Output()
 	if err != nil {
-		// `crontab -l` exits non-zero when there is no crontab yet.
-		if _, ok := err.(*exec.ExitError); ok {
+		// `crontab -l` exits non-zero when there is no crontab yet ("no crontab
+		// for user"). Any other failure must not be mistaken for an empty
+		// crontab: the caller rewrites the whole crontab from what it read.
+		msg := strings.TrimSpace(stderr.String())
+		lower := strings.ToLower(msg)
+		if _, ok := err.(*exec.ExitError); ok &&
+			(msg == "" || strings.Contains(lower, "no crontab") || strings.Contains(lower, "no such file")) {
 			return "", nil
 		}
-		return "", fmt.Errorf("reading crontab: %w", err)
+		return "", fmt.Errorf("reading crontab: %w: %s", err, msg)
 	}
 	return string(out), nil
 }
@@ -150,11 +158,31 @@ func formatJobLine(account string, j Job, exe, logPath string) string {
 	if j.Weekly {
 		dow = strconv.Itoa(int(j.Weekday))
 	}
-	cmd := fmt.Sprintf("%q %s --account %q", exe, j.Kind.Arg(), account)
+	cmd := fmt.Sprintf("%s %s --account %s", cronQuote(exe), j.Kind.Arg(), cronQuote(account))
 	if j.Kind == Upload && j.Folder != "" {
-		cmd += fmt.Sprintf(" --folder %q", j.Folder)
+		cmd += " --folder " + cronQuote(j.Folder)
 	}
-	return fmt.Sprintf(`%d %d * * %s %s >/dev/null 2>>%q`, j.Min, j.Hour, dow, cmd, logPath)
+	return fmt.Sprintf(`%d %d * * %s %s >/dev/null 2>>%s`, j.Min, j.Hour, dow, cmd, cronQuote(logPath))
+}
+
+// cronEscapes are the characters cronQuote backslash-escapes inside quotes.
+const cronEscapes = "\\\"$`%"
+
+// cronQuote double-quotes s for a crontab command. The shell would expand $ and
+// ` inside double quotes and cron turns an unescaped % into a newline, so those
+// are backslash-escaped along with \ and ". cron strips the backslash before a
+// %, and the shell strips the others, so the command sees s unchanged.
+func cronQuote(s string) string {
+	var b strings.Builder
+	b.WriteByte('"')
+	for i := 0; i < len(s); i++ {
+		if strings.IndexByte(cronEscapes, s[i]) >= 0 {
+			b.WriteByte('\\')
+		}
+		b.WriteByte(s[i])
+	}
+	b.WriteByte('"')
+	return b.String()
 }
 
 // current parses the managed crontab lines that belong to account back into
@@ -182,7 +210,7 @@ func current(account string) ([]Job, error) {
 // the rcss subcommand token, and recovers the target folder from --folder.
 // Returns ok=false for malformed lines.
 func parseManagedLine(line string) (Job, bool) {
-	f := splitArgs(line)
+	f := splitArgs(line, cronEscapes)
 	if len(f) < 6 {
 		return Job{}, false
 	}
@@ -216,5 +244,5 @@ func parseManagedLine(line string) (Job, bool) {
 // lineAccount returns the account a managed cron line targets (the value of
 // --account), or "" if it carries none.
 func lineAccount(line string) string {
-	return flagValue(splitArgs(line), "--account")
+	return flagValue(splitArgs(line, cronEscapes), "--account")
 }

@@ -1,6 +1,7 @@
 package scheduler
 
 import (
+	"strings"
 	"testing"
 	"time"
 )
@@ -47,7 +48,7 @@ func TestWeekdayShort(t *testing.T) {
 // TestSplitArgs checks the quote-aware tokenizer that lets folders, binaries and
 // log paths contain spaces without corrupting the parse on the way back.
 func TestSplitArgs(t *testing.T) {
-	got := splitArgs(`0 3 * * * "/opt/my apps/rcss" upload --account "drive:" --folder "/home/u/My Docs" >> "/tmp/a b.log" 2>&1`)
+	got := splitArgs(`0 3 * * * "/opt/my apps/rcss" upload --account "drive:" --folder "/home/u/My Docs" >> "/tmp/a b.log" 2>&1`, `\"`)
 	want := []string{
 		"0", "3", "*", "*", "*", "/opt/my apps/rcss", "upload",
 		"--account", "drive:", "--folder", "/home/u/My Docs", ">>", "/tmp/a b.log", "2>&1",
@@ -62,25 +63,24 @@ func TestSplitArgs(t *testing.T) {
 	}
 }
 
-// TestSplitArgsBackslashes pins the escape rule: only \" and \\ are escapes
-// (what Go's %q emits into a crontab line), so a Windows path keeps its literal
-// backslashes when it comes back out of a scheduled task's arguments.
+// TestSplitArgsBackslashes pins the escape rule: a backslash escapes only the
+// characters a backend declares, so Windows paths (no escapes) keep every
+// backslash — including a UNC prefix — while crontab lines unescape theirs.
 func TestSplitArgsBackslashes(t *testing.T) {
-	cases := map[string][]string{
-		`upload --folder "C:\My Projects\alpha"`: {"upload", "--folder", `C:\My Projects\alpha`},
-		`upload --folder "/home/u/a\\b"`:         {"upload", "--folder", `/home/u/a\b`},
-		`upload --folder "/home/u/say \"hi\""`:   {"upload", "--folder", `/home/u/say "hi"`},
+	cases := []struct {
+		line, escapes string
+		want          []string
+	}{
+		{`upload --folder "C:\My Projects\alpha"`, "", []string{"upload", "--folder", `C:\My Projects\alpha`}},
+		{`upload --folder "\\nas\backup"`, "", []string{"upload", "--folder", `\\nas\backup`}},
+		{`upload --folder "/home/u/a\\b"`, `\"`, []string{"upload", "--folder", `/home/u/a\b`}},
+		{`upload --folder "/home/u/say \"hi\""`, `\"`, []string{"upload", "--folder", `/home/u/say "hi"`}},
+		{`upload --folder "/home/u/\$HOME 100\%"`, "\\\"$%", []string{"upload", "--folder", `/home/u/$HOME 100%`}},
 	}
-	for line, want := range cases {
-		got := splitArgs(line)
-		if len(got) != len(want) {
-			t.Errorf("splitArgs(%s) = %q, want %q", line, got, want)
-			continue
-		}
-		for i := range want {
-			if got[i] != want[i] {
-				t.Errorf("splitArgs(%s)[%d] = %q, want %q", line, i, got[i], want[i])
-			}
+	for _, c := range cases {
+		got := splitArgs(c.line, c.escapes)
+		if strings.Join(got, "|") != strings.Join(c.want, "|") {
+			t.Errorf("splitArgs(%s, %q) = %q, want %q", c.line, c.escapes, got, c.want)
 		}
 	}
 }

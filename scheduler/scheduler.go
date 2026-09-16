@@ -102,10 +102,14 @@ func weekdayShort(d time.Weekday) string {
 }
 
 // splitArgs splits a scheduled command line into tokens the way a shell would,
-// honouring double quotes and backslash escapes inside them. strings.Fields
-// cannot do this, and both backends quote paths — so a source folder like
-// "/home/u/My Documents" must stay a single token on the way back in.
-func splitArgs(line string) []string {
+// honouring double quotes. strings.Fields cannot do this, and both backends
+// quote paths — so a source folder like "/home/u/My Documents" must stay a
+// single token on the way back in. Inside quotes, a backslash is an escape only
+// before one of the characters in escapes; every other backslash is literal.
+// Each backend passes the escapes its emitter produces: the crontab quotes
+// \ " $ ` and %, while Task Scheduler arguments carry none, so a Windows path
+// like C:\My Projects or \\nas\share survives intact.
+func splitArgs(line, escapes string) []string {
 	var (
 		out    []string
 		cur    strings.Builder
@@ -125,10 +129,7 @@ func splitArgs(line string) []string {
 		case c == '"':
 			inQuot = !inQuot
 			inTok = true // an empty "" is still a token
-		case inQuot && c == '\\' && i+1 < len(line) && (line[i+1] == '"' || line[i+1] == '\\'):
-			// Honour only the two escapes the emitters actually produce (Go's %q
-			// on the crontab side). Every other backslash is literal, so a Windows
-			// path like C:\My Projects\alpha survives intact.
+		case inQuot && c == '\\' && i+1 < len(line) && strings.IndexByte(escapes, line[i+1]) >= 0:
 			i++
 			cur.WriteByte(line[i])
 			inTok = true

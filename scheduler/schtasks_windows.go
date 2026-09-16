@@ -165,7 +165,7 @@ func current(account string) ([]Job, error) {
 func parseTaskXML(xml string) Job {
 	xml = strings.ReplaceAll(xml, "\x00", "")
 	j := Job{Kind: Upload, Hour: -1, Min: -1, Weekly: strings.Contains(xml, "ScheduleByWeek")}
-	args := splitArgs(unescapeXML(tagValue(xml, "Arguments")))
+	args := splitArgs(unescapeXML(tagValue(xml, "Arguments")), "")
 	for _, tok := range args {
 		if tok == "clean" {
 			j.Kind = Clean
