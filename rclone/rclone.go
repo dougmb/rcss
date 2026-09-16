@@ -9,8 +9,11 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"runtime"
 	"strings"
 )
 
@@ -23,8 +26,44 @@ type Client struct {
 	Bin string
 }
 
-// New returns a Client using the rclone binary found on PATH.
-func New() *Client { return &Client{Bin: DefaultBin} }
+// New returns a Client using the rclone binary found on PATH, falling back to
+// the usual install locations that a minimal environment leaves off PATH —
+// cron runs jobs with PATH=/usr/bin:/bin, which misses Homebrew's
+// /opt/homebrew/bin and per-user installs such as ~/.local/bin.
+func New() *Client { return &Client{Bin: findBin()} }
+
+func findBin() string {
+	if _, err := exec.LookPath(DefaultBin); err == nil {
+		return DefaultBin
+	}
+	home, _ := os.UserHomeDir()
+	var dirs []string
+	if runtime.GOOS == "windows" {
+		dirs = []string{
+			filepath.Join(os.Getenv("LOCALAPPDATA"), "Microsoft", "WinGet", "Links"),
+			filepath.Join(home, "scoop", "shims"),
+			filepath.Join(os.Getenv("ProgramData"), "chocolatey", "bin"),
+		}
+	} else {
+		dirs = []string{
+			"/opt/homebrew/bin", "/usr/local/bin", "/home/linuxbrew/.linuxbrew/bin", "/snap/bin",
+			filepath.Join(home, ".local", "bin"), filepath.Join(home, "bin"),
+		}
+	}
+	for _, dir := range dirs {
+		if dir == "" || !filepath.IsAbs(dir) {
+			continue
+		}
+		p := filepath.Join(dir, DefaultBin)
+		if runtime.GOOS == "windows" {
+			p += ".exe"
+		}
+		if fi, err := os.Stat(p); err == nil && !fi.IsDir() {
+			return p
+		}
+	}
+	return DefaultBin
+}
 
 func (c *Client) bin() string {
 	if c == nil || c.Bin == "" {
@@ -224,6 +263,9 @@ func (c *Client) stream(ctx context.Context, onLine func(string), args ...string
 			onLine(scanner.Text())
 		}
 	}
+	// A scan error (e.g. an over-long line) stops reading early; drain the rest
+	// so rclone never blocks on a full pipe and Wait can return.
+	_, _ = io.Copy(io.Discard, pr)
 	pr.Close()
 
 	if err := cmd.Wait(); err != nil {

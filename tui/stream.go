@@ -1,7 +1,6 @@
 package tui
 
 import (
-	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -50,21 +49,4 @@ func (s *opStream) wait() tea.Cmd {
 		}
 		return ev
 	}
-}
-
-// stringItem is a plain list row backed by a string, used by the project and
-// file pickers.
-type stringItem string
-
-func (s stringItem) Title() string       { return string(s) }
-func (s stringItem) Description() string { return "" }
-func (s stringItem) FilterValue() string { return string(s) }
-
-// toItems wraps strings as list items.
-func toItems(ss []string) []list.Item {
-	items := make([]list.Item, len(ss))
-	for i, s := range ss {
-		items[i] = stringItem(s)
-	}
-	return items
 }

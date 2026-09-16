@@ -36,7 +36,7 @@ func (f *folderModel) setHeight(h int) {
 	if h < 1 {
 		h = 1
 	}
-	f.fp.Height = h
+	f.fp.SetHeight(h)
 }
 
 // Update drives the picker. enter on a highlighted directory selects it

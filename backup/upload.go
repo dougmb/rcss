@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dougmb/rcss-tui/config"
-	"github.com/dougmb/rcss-tui/rclone"
+	"github.com/dougmb/rcss/config"
+	"github.com/dougmb/rcss/rclone"
 )
 
 // UploadOptions tweaks an Upload run beyond the persisted config.

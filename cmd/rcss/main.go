@@ -17,10 +17,10 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/dougmb/rcss-tui/backup"
-	"github.com/dougmb/rcss-tui/config"
-	"github.com/dougmb/rcss-tui/rclone"
-	"github.com/dougmb/rcss-tui/tui"
+	"github.com/dougmb/rcss/backup"
+	"github.com/dougmb/rcss/config"
+	"github.com/dougmb/rcss/rclone"
+	"github.com/dougmb/rcss/tui"
 )
 
 func main() {
@@ -40,6 +40,8 @@ func main() {
 		os.Exit(runUpload(args[1:]))
 	case "clean":
 		os.Exit(runClean(args[1:]))
+	case "version", "--version":
+		fmt.Println("rcss", tui.Version())
 	case "help", "-h", "--help":
 		usage(os.Stdout)
 	default:
@@ -56,6 +58,7 @@ Usage:
   rcss                 open the terminal UI
   rcss upload [-v] [-p] [--folder DIR] [--account NAME]
   rcss clean  [-v] [--dry-run] [--force] [--account NAME]
+  rcss version
   rcss help
 
 Flags:

@@ -9,7 +9,7 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/dougmb/rcss-tui/rclone"
+	"github.com/dougmb/rcss/rclone"
 )
 
 // Account screen: the multi-account manager. It lists the rclone remotes and

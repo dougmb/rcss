@@ -15,11 +15,12 @@ import (
 // helpers only, so the real crontab is never touched.
 func TestFormatParseRoundTrip(t *testing.T) {
 	cases := []Job{
-		{Kind: Upload, Hour: 3, Min: 0},                                        // daily upload, all folders
-		{Kind: Clean, Hour: 7, Min: 30, Weekly: true, Weekday: time.Wednesday}, // weekly clean, Wed
-		{Kind: Upload, Hour: 23, Min: 59, Weekly: true, Weekday: time.Sunday},  // weekly upload, Sun
-		{Kind: Upload, Hour: 2, Min: 5, Folder: "/srv/alpha"},                  // one folder
-		{Kind: Upload, Hour: 4, Min: 45, Folder: "/home/u/My Documents"},       // folder with a space
+		{Kind: Upload, Hour: 3, Min: 0},                                         // daily upload, all folders
+		{Kind: Clean, Hour: 7, Min: 30, Weekly: true, Weekday: time.Wednesday},  // weekly clean, Wed
+		{Kind: Upload, Hour: 23, Min: 59, Weekly: true, Weekday: time.Sunday},   // weekly upload, Sun
+		{Kind: Upload, Hour: 2, Min: 5, Folder: "/srv/alpha"},                   // one folder
+		{Kind: Upload, Hour: 4, Min: 45, Folder: "/home/u/My Documents"},        // folder with a space
+		{Kind: Upload, Hour: 5, Min: 0, Folder: "/home/u/$x `y` 100% \\ \"q\""}, // shell/cron specials
 	}
 	for _, want := range cases {
 		line := formatJobLine("drive:", want, "/opt/my apps/rcss", "/var/log/my logs/backup.log")

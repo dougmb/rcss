@@ -1,4 +1,4 @@
-module github.com/dougmb/rcss-tui
+module github.com/dougmb/rcss
 
 go 1.26.4
 

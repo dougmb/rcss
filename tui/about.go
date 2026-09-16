@@ -6,9 +6,9 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/dougmb/rcss-tui/backup"
-	"github.com/dougmb/rcss-tui/config"
-	"github.com/dougmb/rcss-tui/scheduler"
+	"github.com/dougmb/rcss/backup"
+	"github.com/dougmb/rcss/config"
+	"github.com/dougmb/rcss/scheduler"
 )
 
 // About screen: app identity, version, the rclone dependency status, and where
@@ -85,7 +85,7 @@ func (a aboutModel) View() string {
 	}
 
 	b.WriteString("\n")
-	b.WriteString(infoLine("Project", "https://github.com/dougmb/RCSS-tui"))
+	b.WriteString(infoLine("Project", "https://github.com/dougmb/rcss"))
 	b.WriteString("\n")
 	b.WriteString(infoLine("rclone", "https://rclone.org"))
 

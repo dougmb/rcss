@@ -6,7 +6,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/dougmb/rcss-tui/config"
+	"github.com/dougmb/rcss/config"
 )
 
 func sendSet(s settingsModel, k tea.KeyMsg) settingsModel {

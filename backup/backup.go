@@ -12,7 +12,7 @@ package backup
 import (
 	"strings"
 
-	"github.com/dougmb/rcss-tui/config"
+	"github.com/dougmb/rcss/config"
 )
 
 // remoteDest returns "<remote>/<destination>" — the base remote path holding

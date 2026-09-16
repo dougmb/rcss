@@ -10,7 +10,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
-	"github.com/dougmb/rcss-tui/config"
+	"github.com/dougmb/rcss/config"
 )
 
 // Settings screen: a single scrollable page editing the active account's

@@ -1,8 +1,17 @@
-# GoReleaser config — builds cross-platform binaries and a GitHub Release.
+# GoReleaser config — builds cross-platform binaries, Linux packages, and a
+# GitHub Release, and optionally publishes to package repositories.
 # Run a snapshot locally with:  goreleaser release --snapshot --clean
-# Cut a real release by pushing a tag (e.g. v0.1.0); a CI release job invokes
+# Cut a real release by pushing a tag (e.g. v0.2.0); a CI release job invokes
 # `goreleaser release --clean`.
+#
+# Package-repository publishing is opt-in per secret — a publisher whose secret
+# is missing is skipped, so a release never fails for lack of one:
+#   AUR_KEY             SSH private key of the AUR account (rcss-bin + rcss)
+#   HOMEBREW_TAP_TOKEN  GitHub token with push access to dougmb/homebrew-tap
+#   SCOOP_BUCKET_TOKEN  GitHub token with push access to dougmb/scoop-bucket
 version: 2
+
+project_name: rcss
 
 before:
   hooks:
@@ -10,7 +19,7 @@ before:
 
 builds:
   - id: rcss
-    main: .
+    main: ./cmd/rcss
     binary: rcss
     env:
       - CGO_ENABLED=0
@@ -21,9 +30,11 @@ builds:
     goarch:
       - amd64
       - arm64
+    flags:
+      - -trimpath
     ldflags:
       - -s -w
-      - -X github.com/dougmb/rcss-tui/tui.version={{ .Version }}
+      - -X github.com/dougmb/rcss/tui.version={{ .Version }}
 
 archives:
   - id: rcss
@@ -33,9 +44,153 @@ archives:
     format_overrides:
       - goos: windows
         formats: [zip]
+    files:
+      - LICENSE
+      - README.md
+
+# Source tarball, used by the build-from-source AUR package.
+source:
+  enabled: true
+  name_template: "{{ .ProjectName }}-{{ .Version }}"
+  prefix_template: "{{ .ProjectName }}-{{ .Version }}/"
+  format: tar.gz
 
 checksum:
   name_template: "checksums.txt"
+
+# .deb / .rpm / .apk / Arch packages attached to the GitHub Release.
+nfpms:
+  - id: rcss
+    package_name: rcss
+    file_name_template: >-
+      {{ .PackageName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}
+    homepage: https://github.com/dougmb/rcss
+    maintainer: dougmb <16156395+dougmb@users.noreply.github.com>
+    description: Terminal UI and headless CLI for per-project backups to an rclone cloud remote.
+    license: MIT
+    formats:
+      - deb
+      - rpm
+      - apk
+      - archlinux
+    bindir: /usr/bin
+    recommends:
+      - rclone
+    contents:
+      - src: LICENSE
+        dst: /usr/share/licenses/rcss/LICENSE
+      - src: README.md
+        dst: /usr/share/doc/rcss/README.md
+    overrides:
+      archlinux:
+        dependencies:
+          - rclone
+
+# AUR: prebuilt binary package.
+aurs:
+  - name: rcss-bin
+    homepage: https://github.com/dougmb/rcss
+    description: Terminal UI and headless CLI for per-project backups to an rclone cloud remote
+    maintainers:
+      - dougmb <16156395+dougmb at users dot noreply dot github dot com>
+    license: MIT
+    private_key: "{{ .Env.AUR_KEY }}"
+    git_url: ssh://aur@aur.archlinux.org/rcss-bin.git
+    skip_upload: '{{ if index .Env "AUR_KEY" }}false{{ else }}true{{ end }}'
+    provides:
+      - rcss
+    conflicts:
+      - rcss
+    depends:
+      - rclone
+    package: |-
+      install -Dm755 "./rcss" "${pkgdir}/usr/bin/rcss"
+      install -Dm644 "./LICENSE" "${pkgdir}/usr/share/licenses/rcss/LICENSE"
+      install -Dm644 "./README.md" "${pkgdir}/usr/share/doc/rcss/README.md"
+    commit_author:
+      name: dougmb
+      email: 16156395+dougmb@users.noreply.github.com
+
+# AUR: build-from-source package.
+aur_sources:
+  - name: rcss
+    homepage: https://github.com/dougmb/rcss
+    description: Terminal UI and headless CLI for per-project backups to an rclone cloud remote
+    maintainers:
+      - dougmb <16156395+dougmb at users dot noreply dot github dot com>
+    license: MIT
+    private_key: "{{ .Env.AUR_KEY }}"
+    git_url: ssh://aur@aur.archlinux.org/rcss.git
+    skip_upload: '{{ if index .Env "AUR_KEY" }}false{{ else }}true{{ end }}'
+    provides:
+      - rcss
+    conflicts:
+      - rcss-bin
+    depends:
+      - rclone
+    makedepends:
+      - go
+    prepare: |-
+      cd "${srcdir}"/rcss-*/
+      go mod download
+    build: |-
+      cd "${srcdir}"/rcss-*/
+      export CGO_CPPFLAGS="${CPPFLAGS}"
+      export CGO_CFLAGS="${CFLAGS}"
+      export CGO_CXXFLAGS="${CXXFLAGS}"
+      export CGO_LDFLAGS="${LDFLAGS}"
+      export GOFLAGS="-buildmode=pie -trimpath -mod=readonly -modcacherw"
+      go build -ldflags "-linkmode=external -X github.com/dougmb/rcss/tui.version=${pkgver}" -o rcss ./cmd/rcss
+    package: |-
+      cd "${srcdir}"/rcss-*/
+      install -Dm755 "./rcss" "${pkgdir}/usr/bin/rcss"
+      install -Dm644 "./LICENSE" "${pkgdir}/usr/share/licenses/rcss/LICENSE"
+      install -Dm644 "./README.md" "${pkgdir}/usr/share/doc/rcss/README.md"
+    commit_author:
+      name: dougmb
+      email: 16156395+dougmb@users.noreply.github.com
+
+# Homebrew (macOS/Linux): cask in dougmb/homebrew-tap.
+homebrew_casks:
+  - name: rcss
+    homepage: https://github.com/dougmb/rcss
+    description: Terminal UI and headless CLI for per-project backups to an rclone cloud remote
+    license: MIT
+    binaries:
+      - rcss
+    dependencies:
+      - formula: rclone
+    repository:
+      owner: dougmb
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    skip_upload: '{{ if index .Env "HOMEBREW_TAP_TOKEN" }}false{{ else }}true{{ end }}'
+    commit_author:
+      name: dougmb
+      email: 16156395+dougmb@users.noreply.github.com
+    hooks:
+      post:
+        install: |
+          if OS.mac?
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/rcss"]
+          end
+
+# Scoop (Windows): manifest in dougmb/scoop-bucket.
+scoops:
+  - name: rcss
+    homepage: https://github.com/dougmb/rcss
+    description: Terminal UI and headless CLI for per-project backups to an rclone cloud remote
+    license: MIT
+    depends:
+      - rclone
+    repository:
+      owner: dougmb
+      name: scoop-bucket
+      token: "{{ .Env.SCOOP_BUCKET_TOKEN }}"
+    skip_upload: '{{ if index .Env "SCOOP_BUCKET_TOKEN" }}false{{ else }}true{{ end }}'
+    commit_author:
+      name: dougmb
+      email: 16156395+dougmb@users.noreply.github.com
 
 changelog:
   sort: asc
@@ -46,4 +201,6 @@ changelog:
       - "^chore:"
 
 release:
-  draft: true
+  # Published immediately: package repositories and install.sh point at the
+  # release's public asset URLs.
+  draft: false
