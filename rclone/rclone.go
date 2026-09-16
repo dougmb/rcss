@@ -9,6 +9,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -262,6 +263,9 @@ func (c *Client) stream(ctx context.Context, onLine func(string), args ...string
 			onLine(scanner.Text())
 		}
 	}
+	// A scan error (e.g. an over-long line) stops reading early; drain the rest
+	// so rclone never blocks on a full pipe and Wait can return.
+	_, _ = io.Copy(io.Discard, pr)
 	pr.Close()
 
 	if err := cmd.Wait(); err != nil {

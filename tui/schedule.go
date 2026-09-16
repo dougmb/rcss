@@ -363,9 +363,6 @@ func (s scheduleModel) buildJobs() []scheduler.Job {
 	return jobs
 }
 
-// anyEnabled reports whether saving would leave any job registered.
-func (s scheduleModel) anyEnabled() bool { return len(s.buildJobs()) > 0 }
-
 // orphanCount is how many scheduled jobs point at folders that are no longer
 // configured, so the view and the save confirmation can call them out.
 func (s scheduleModel) orphanCount() int {

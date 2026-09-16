@@ -289,6 +289,22 @@ with its own `--folder`. A folder that is not configured for the account is an
 error, so a job left behind by a removed folder fails loudly in the log instead
 of quietly backing up nothing.
 
+### Scheduling notes
+
+- **Install RCSS before scheduling.** Jobs run the exact binary that saved
+  them; RCSS refuses to schedule from a temporary `go run` build.
+- **Retention is by file modification time.** rclone keeps each file's original
+  modification time, so `remote_retention_days` counts from when a file was
+  last changed locally, not from when it was uploaded. RCSS suits folders of
+  dated backup artifacts (dumps, archives); for folders of live documents,
+  cleaning will remove unchanged files from the cloud until the next upload
+  sends them again.
+- **macOS**: cron needs *Full Disk Access* (System Settings → Privacy &
+  Security) to read folders such as `~/Documents` and `~/Desktop`.
+- **Windows**: tasks run only while you are logged in, and each run briefly
+  opens a console window.
+- Errors from scheduled runs land in the account's log (see `log_file`).
+
 ## Configuration
 
 Settings live in a single TOML file at `~/.config/rcss/config.toml` (respecting
@@ -303,15 +319,15 @@ Each account entry has these fields:
 | Field                          | Default                                | Meaning                                                                                                                                                                |
 | ------------------------------ | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `remote_name`                | —                                     | rclone remote, e.g.`drive:` (the account key)                                                                                                                        |
-| `source_root`                | —                                     | local folder whose sub-folders are projects                                                                                                                            |
+| `source_folders`             | `[]`                                   | local folders to back up; each is uploaded to `<remote_destination>/<folder name>` |
 | `remote_destination`         | `` (blank)                             | destination folder on the remote;**blank = the account root**                                                                                                    |
 | `restore_destination`        | `` (blank)                             | local folder restores are written to;**blank = the backup source**                                                                                               |
 | `delete_after_upload`        | `false`                              | enable local cleanup after a successful upload;**off keeps all local files**                                                                                     |
 | `retention_days`             | `0`                                  | when`delete_after_upload` is on, keep local files this many days (**0 = delete all**); ignored when off                                                        |
-| `remote_retention_days`      | `15`                                 | delete**cloud** files older than this on clean                                                                                                                   |
-| `remote_cleanup_safety_days` | `2`                                  | clean is blocked unless a backup newer than this exists                                                                                                                |
+| `remote_retention_days`      | `15`                                 | on clean, delete **cloud** files older than this inside each backup folder (minimum 1) |
+| `remote_cleanup_safety_days` | `2`                                  | clean skips a backup folder unless it holds a file newer than this (minimum 1) |
 | `skip_formats`               | `` (blank)                             | file patterns excluded from uploads; a token like`tmp` means `*.tmp`, while `.*`, `*.log`, or `node_modules/**` are used verbatim (so `.*` skips dotfiles) |
-| `ignored_folders`            | `scripts config bin logs lost+found` | sub-folders never treated as projects                                                                                                                                  |
+| `ignored_folders`            | `` (blank)                             | directory names excluded from uploads (e.g. `node_modules`), anywhere inside a source folder |
 | `log_file`                   | (config dir)/`backup-<account>.log`  | append-only run log (per account)                                                                                                                                      |
 
 ## Safety guarantees
@@ -320,17 +336,20 @@ Each account entry has these fields:
   that project — a failed upload never removes local data, and with
   `delete_after_upload` off nothing local is ever deleted. Files excluded by
   `skip_formats` are never deleted locally (they were not uploaded).
-- **Remote cleanup is locked** unless a recent backup (within
-  `remote_cleanup_safety_days`) exists on the remote, so a silently-stopped
-  upload cron cannot let cleanup wipe your history. `--force` bypasses the lock
-  and is intentionally dangerous.
+- **Remote cleanup only touches the backup folders RCSS uploads** —
+  `<remote_destination>/<folder name>` for each source folder. Nothing else on
+  the remote is ever deleted, even when the destination is the account root.
+- **Remote cleanup is locked per folder**: a backup folder is skipped unless it
+  holds a file newer than `remote_cleanup_safety_days`, so a silently-stopped
+  upload cannot let cleanup wipe that folder's history. `--force` bypasses the
+  lock and is intentionally dangerous.
 - In the UI, **Clean always previews with a dry-run first**; the real deletion
   requires an explicit keypress. Clean only ever deletes **cloud** files — local
   files are pruned by Back Up Now. The optional **Force** toggle bypasses the
   safety lock and is double-confirmed in the UI (and is `--force` headless).
 - Scheduling only ever touches RCSS-managed entries: a single delimited
   `# >>> RCSS-managed >>>` … `# <<< RCSS-managed <<<` block in your crontab on
-  Unix, or the `RCSS-Upload` / `RCSS-Clean` tasks on Windows. Every other entry
+  Unix, or the tasks named `RCSS-<account>-…` in Task Scheduler on Windows. Every other entry
   is preserved, clearing the schedule removes just those, and neither needs
   root/admin rights.
 
