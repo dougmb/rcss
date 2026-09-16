@@ -226,14 +226,22 @@ func (c cleanModel) introView() string {
 	b.WriteString("\n\n")
 
 	b.WriteString(subtitleStyle.Render("Deletes (cloud):"))
-	b.WriteString(fmt.Sprintf("\n  • Files at %s older than %d day(s).",
-		c.remoteDest(), c.cfg.RemoteRetentionDays))
+	b.WriteString(fmt.Sprintf("\n  • Files older than %d day(s), only inside the backup folders:",
+		c.cfg.RemoteRetentionDays))
+	targets := backup.CleanTargets(c.cfg)
+	if len(targets) == 0 {
+		b.WriteString("\n    (no source folders configured — nothing to clean)")
+	}
+	for _, t := range targets {
+		b.WriteString("\n    " + t)
+	}
+	b.WriteString("\n  • Nothing else on the remote is touched.")
 	b.WriteString("\n\n")
 
 	b.WriteString(subtitleStyle.Render("Safety lock:"))
-	b.WriteString(fmt.Sprintf("\n  • Aborts unless a backup newer than %d day(s) exists on the remote,",
+	b.WriteString(fmt.Sprintf("\n  • Skips a folder unless it holds a backup newer than %d day(s),",
 		c.cfg.RemoteCleanupSafetyDays))
-	b.WriteString("\n    guarding history if uploads silently stopped.")
+	b.WriteString("\n    guarding its history if its uploads silently stopped.")
 	b.WriteString("\n\n")
 
 	b.WriteString(subtitleStyle.Render("Local files are NOT touched here:"))
@@ -250,8 +258,8 @@ func (c cleanModel) confirmForceView() string {
 	b.WriteString(warnStyle.Render("⚠ FORCE DELETE — confirm"))
 	b.WriteString("\n\n")
 	b.WriteString(fmt.Sprintf("Force mode is ON. This BYPASSES the safety lock and deletes cloud files\n"+
-		"older than %d day(s) at %s even if NO recent backup exists.\n"+
-		"This can remove your only copies.",
+		"older than %d day(s) in the backup folders under %s even if NO recent\n"+
+		"backup exists. This can remove your only copies.",
 		c.cfg.RemoteRetentionDays, c.remoteDest()))
 	b.WriteString("\n\n")
 	b.WriteString(errorStyle.Render("Press y to proceed, or n / esc to cancel."))

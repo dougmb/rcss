@@ -2,8 +2,10 @@ package backup
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"sort"
@@ -22,8 +24,17 @@ type RemoteEntry struct {
 // isDirNotFound reports whether err is rclone's "directory not found" — the
 // expected state before any backup has been uploaded (the destination folder
 // doesn't exist yet). Callers treat it as an empty listing, not a failure.
+// Streamed commands carry only the exit status, so rclone's documented exit
+// code 3 ("directory not found") is checked as well as the message.
 func isDirNotFound(err error) bool {
-	return err != nil && strings.Contains(err.Error(), "directory not found")
+	if err == nil {
+		return false
+	}
+	var exitErr *exec.ExitError
+	if errors.As(err, &exitErr) && exitErr.ExitCode() == 3 {
+		return true
+	}
+	return strings.Contains(err.Error(), "directory not found")
 }
 
 // ListEntries lists files and directories at a path relative to the account's
