@@ -73,25 +73,16 @@ func TestRestoreTarget(t *testing.T) {
 }
 
 // TestRestoreBuildsDestination verifies that Restore creates the correct local
-// destination for files and directories. It uses a fake rclone binary that
-// records the received src/dst arguments and succeeds immediately.
+// destination for files and directories. It uses the test binary as a fake
+// rclone (see TestMain) that records the received src/dst arguments.
 func TestRestoreBuildsDestination(t *testing.T) {
-	fake := filepath.Join(t.TempDir(), "rclone")
-	if err := os.WriteFile(fake, []byte(`#!/bin/sh
-# Fake rclone: record arguments and succeed.
-echo "$*" > "$RCSS_FAKE_OUTPUT"
-`), 0o755); err != nil {
-		t.Fatal(err)
-	}
-
 	runRestore := func(isDir bool, relPath, restoreDir string) (src, dst string) {
 		t.Helper()
-		outFile := filepath.Join(t.TempDir(), "out.txt")
-		t.Setenv("RCSS_FAKE_OUTPUT", outFile)
+		logPath := filepath.Join(t.TempDir(), "calls.log")
+		t.Setenv("FAKE_RCLONE_LOG", logPath)
 
 		cfg := config.Config{RemoteName: "drive:", RestoreDestination: restoreDir}
-		// Use the real Client but point it at our fake binary.
-		rc := &rclone.Client{Bin: fake}
+		rc := &rclone.Client{Bin: os.Args[0]}
 		log, _ := NewLogger("", func(string) {}, false)
 		defer log.Close()
 
@@ -99,7 +90,7 @@ echo "$*" > "$RCSS_FAKE_OUTPUT"
 			t.Fatalf("Restore failed: %v", err)
 		}
 
-		out, err := os.ReadFile(outFile)
+		out, err := os.ReadFile(logPath)
 		if err != nil {
 			t.Fatalf("reading fake output: %v", err)
 		}
