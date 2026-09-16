@@ -15,7 +15,7 @@ The backup logic was **ported to Go from three original Bash scripts** (`uploadB
 ```bash
 go build ./...        # build everything
 go vet ./...          # vet — keep clean
-go build -o rcss .    # produce the binary
+go build -o rcss ./cmd/rcss    # produce the binary
 
 ./rcss                       # open the TUI
 ./rcss upload [-v] [-p] [--folder DIR]   # headless upload (what cron runs)
@@ -28,12 +28,12 @@ go test -run TestLastRun ./backup/   # a single test
 
 Tests are light but spread across three packages: `tui/app_test.go` drives the root model headless (the pattern below — navigation, help overlay, rclone-missing lock, Clean force double-confirm, Settings save), `backup/status_test.go` covers `LastRun` block parsing, and `config/store_test.go` covers in-memory account ops and per-account log resolution (no disk I/O, so the real config is never touched). CI (`.github/workflows/ci.yml`) runs `go build`, `go vet`, and `go test -race ./...` on all three OSes, so keep code portable and race-clean. Beyond the unit tests, verify changes by building/vetting and by driving the relevant package with a **fake `rclone`** on the PATH (a script that echoes canned `lsf`/`copy`/`delete` output) — this is how the backup logic and TUI flows are exercised without a real remote. For TUI work, sub-models can be driven headless by feeding `tea.Msg`s into `Update` and inspecting `View()`.
 
-Releases are cut by goreleaser (`.goreleaser.yaml`) from `v*` tags via `.github/workflows/release.yml` — don't hand-build release artifacts.
+Releases are cut by goreleaser (`.goreleaser.yaml`) from `v*` tags via `.github/workflows/release.yml` — don't hand-build release artifacts. Besides archives it builds deb/rpm/apk/archlinux packages and, when their secrets are set, publishes the AUR (`rcss-bin`, `rcss`), Homebrew cask and Scoop manifest; `install.sh`/`install.ps1` install the latest release. The entrypoint lives in `cmd/rcss` so `go install …/cmd/rcss` yields a binary named `rcss`. See `RELEASING.md`.
 
 ## Architecture
 
 ```
-main.go      entrypoint: no args → TUI; `upload`/`clean` → headless (cron). Shared backup engine either way.
+cmd/rcss/    entrypoint: no args → TUI; `upload`/`clean` → headless (cron). Shared backup engine either way.
 config/      Store of isolated accounts (Config per rclone remote) + active account + LoadStore/Save of ~/.config/rcss/config.toml (XDG-aware) + defaults.
 rclone/      thin wrapper over the rclone binary: ListRemotes, Lsf, Copy, Delete, EnsureInstalled (PATH check).
 backup/      ported business logic: Upload, Clean, Restore (+ ListTopLevel/ListFiles) and the Logger.

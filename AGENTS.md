@@ -16,7 +16,7 @@ RCSS-tui is a pure-Go Bubbletea TUI + headless CLI for per-project backups via t
 go build ./...        # build all packages
 go vet ./...          # keep clean
 go test -race ./...   # what CI runs on all three OSes
-go build -o rcss .    # produce the local binary
+go build -o rcss ./cmd/rcss    # produce the local binary
 ```
 
 CI (`.github/workflows/ci.yml`) runs `go build ./...`, `go vet ./...`, `go test -race ./...` on `ubuntu-latest`, `macos-latest`, `windows-latest`. No lint/typecheck step beyond `vet`.
@@ -33,7 +33,7 @@ CI (`.github/workflows/ci.yml`) runs `go build ./...`, `go vet ./...`, `go test 
 ## Architecture
 
 ```
-main.go      no args → TUI; upload/clean → headless
+cmd/rcss/    no args → TUI; upload/clean → headless
 config/      ~/.config/rcss/config.toml model + Load/Save; multi-account Store
 rclone/      thin exec wrapper: ListRemotes, Lsf, Copy, Delete, EnsureInstalled
 backup/      Upload, Clean, Restore, Logger, LastRun status parsing

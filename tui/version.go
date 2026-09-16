@@ -6,6 +6,9 @@ import "runtime/debug"
 // build time with -ldflags "-X github.com/dougmb/rcss-tui/tui.version=v1.2.3".
 var version = "dev"
 
+// Version returns the build version, for `rcss version`.
+func Version() string { return appVersion() }
+
 // appVersion returns the build version, falling back to the module version
 // embedded by `go install module@version` when no ldflags value was set.
 func appVersion() string {

@@ -37,15 +37,59 @@ credentials in its own config; RCSS never handles API secrets.
 
 ## Install
 
+Every method below installs a single binary named `rcss`; once it is on your
+`PATH`, type `rcss` to open the app. Install from a stable location (not
+`go run`) — scheduled backups run this exact binary.
+
+### Install script (Linux / macOS)
+
 ```bash
-# Requires Go and rclone on your PATH
-git clone https://github.com/dougmb/RCSS-tui.git
-cd RCSS-tui
-go build -o rcss .
-./rcss
+curl -fsSL https://raw.githubusercontent.com/dougmb/RCSS-tui/main/install.sh | sh
 ```
 
-You also need **rclone** installed with at least one configured remote — see
+Downloads the latest release for your OS/CPU, verifies it against
+`checksums.txt`, and installs it to `~/.local/bin` (override with
+`RCSS_INSTALL_DIR`; pin a version with `RCSS_VERSION=v0.2.0`). Re-run it to
+upgrade.
+
+### Install script (Windows, PowerShell)
+
+```powershell
+irm https://raw.githubusercontent.com/dougmb/RCSS-tui/main/install.ps1 | iex
+```
+
+Installs `rcss.exe` to `%LOCALAPPDATA%\Programs\rcss` and adds it to your user
+`PATH` (open a new terminal afterwards).
+
+### Package managers
+
+| Platform              | Command                                              |
+| --------------------- | ---------------------------------------------------- |
+| Arch Linux (AUR)      | `yay -S rcss-bin` (prebuilt) or `yay -S rcss` (source) |
+| Debian / Ubuntu       | download the `.deb` from [Releases](https://github.com/dougmb/RCSS-tui/releases), then `sudo apt install ./rcss_*.deb` |
+| Fedora / openSUSE     | download the `.rpm`, then `sudo dnf install ./rcss_*.rpm` |
+| Alpine                | download the `.apk`, then `sudo apk add --allow-untrusted ./rcss_*.apk` |
+| macOS / Linux (Homebrew) | `brew install --cask dougmb/tap/rcss`            |
+| Windows (Scoop)       | `scoop bucket add dougmb https://github.com/dougmb/scoop-bucket` then `scoop install rcss` |
+
+### With Go
+
+```bash
+go install github.com/dougmb/rcss-tui/cmd/rcss@latest   # installs to $(go env GOPATH)/bin
+```
+
+Make sure `$(go env GOPATH)/bin` is on your `PATH`.
+
+### From source
+
+```bash
+git clone https://github.com/dougmb/RCSS-tui.git
+cd RCSS-tui
+go build -o ~/.local/bin/rcss ./cmd/rcss
+```
+
+Check the install with `rcss version`. You also need **rclone** installed with
+at least one configured remote — see
 [Prerequisite: rclone](#prerequisite-rclone) next.
 
 ## Prerequisite: rclone
@@ -293,7 +337,7 @@ Each account entry has these fields:
 ## Project layout
 
 ```
-main.go      entrypoint: no args → TUI; `upload`/`clean` → headless (cron)
+cmd/rcss/    entrypoint: no args → TUI; `upload`/`clean` → headless (cron)
 config/      config.toml model + Load/Save + defaults
 rclone/      thin wrapper over the rclone binary (ListRemotes, Lsf, Copy, Delete)
 backup/      ported Upload / Clean / Restore + logging (safety invariants)
