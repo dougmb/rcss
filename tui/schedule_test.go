@@ -7,8 +7,8 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/dougmb/rcss-tui/config"
-	"github.com/dougmb/rcss-tui/scheduler"
+	"github.com/dougmb/rcss/config"
+	"github.com/dougmb/rcss/scheduler"
 )
 
 func keyType(t tea.KeyType) tea.KeyMsg { return tea.KeyMsg{Type: t} }

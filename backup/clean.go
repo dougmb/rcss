@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/dougmb/rcss-tui/config"
-	"github.com/dougmb/rcss-tui/rclone"
+	"github.com/dougmb/rcss/config"
+	"github.com/dougmb/rcss/rclone"
 )
 
 // ErrNoRecentBackup is returned by Clean when the safety lock trips: no backup

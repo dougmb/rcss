@@ -1,13 +1,13 @@
 # Install the latest RCSS release on Windows.
 #
-#   irm https://raw.githubusercontent.com/dougmb/RCSS-tui/main/install.ps1 | iex
+#   irm https://raw.githubusercontent.com/dougmb/rcss/main/install.ps1 | iex
 #
 # Environment:
 #   RCSS_VERSION      release tag to install (default: latest), e.g. v0.2.0
 #   RCSS_INSTALL_DIR  where to put rcss.exe (default: %LOCALAPPDATA%\Programs\rcss)
 $ErrorActionPreference = 'Stop'
 
-$Repo = 'dougmb/RCSS-tui'
+$Repo = 'dougmb/rcss'
 $InstallDir = if ($env:RCSS_INSTALL_DIR) { $env:RCSS_INSTALL_DIR } else { Join-Path $env:LOCALAPPDATA 'Programs\rcss' }
 
 $arch = switch ($env:PROCESSOR_ARCHITECTURE) {

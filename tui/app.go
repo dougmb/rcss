@@ -17,8 +17,8 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
-	"github.com/dougmb/rcss-tui/config"
-	"github.com/dougmb/rcss-tui/rclone"
+	"github.com/dougmb/rcss/config"
+	"github.com/dougmb/rcss/rclone"
 )
 
 // Shared messages used by multiple sub-models.

@@ -61,7 +61,7 @@ with `makepkg` from `dist/aur/` (point `source` at the local `dist/` files).
 Packagers can build from the source tarball with just Go:
 
 ```bash
-go build -trimpath -ldflags "-X github.com/dougmb/rcss-tui/tui.version=<ver>" -o rcss ./cmd/rcss
+go build -trimpath -ldflags "-X github.com/dougmb/rcss/tui.version=<ver>" -o rcss ./cmd/rcss
 ```
 
 The only runtime dependency is `rclone`. `rcss version` prints the embedded version.

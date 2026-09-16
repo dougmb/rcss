@@ -8,9 +8,9 @@ import (
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/dougmb/rcss-tui/backup"
-	"github.com/dougmb/rcss-tui/config"
-	"github.com/dougmb/rcss-tui/rclone"
+	"github.com/dougmb/rcss/backup"
+	"github.com/dougmb/rcss/config"
+	"github.com/dougmb/rcss/rclone"
 )
 
 // Clean screen: opens on an intro that spells out exactly what gets deleted

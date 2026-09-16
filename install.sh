@@ -1,14 +1,14 @@
 #!/bin/sh
 # Install the latest RCSS release on Linux or macOS.
 #
-#   curl -fsSL https://raw.githubusercontent.com/dougmb/RCSS-tui/main/install.sh | sh
+#   curl -fsSL https://raw.githubusercontent.com/dougmb/rcss/main/install.sh | sh
 #
 # Environment:
 #   RCSS_VERSION      release tag to install (default: latest), e.g. v0.2.0
 #   RCSS_INSTALL_DIR  where to put the binary (default: ~/.local/bin)
 set -eu
 
-REPO="dougmb/RCSS-tui"
+REPO="dougmb/rcss"
 INSTALL_DIR="${RCSS_INSTALL_DIR:-$HOME/.local/bin}"
 
 say() { printf '%s\n' "$*"; }

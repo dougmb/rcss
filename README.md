@@ -1,4 +1,4 @@
-# RCSS-tui — Rclone Cloud Simple Scripts
+# RCSS — Rclone Cloud Simple Scripts
 
 This app still in development and not released.
 
@@ -44,7 +44,7 @@ Every method below installs a single binary named `rcss`; once it is on your
 ### Install script (Linux / macOS)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/dougmb/RCSS-tui/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/dougmb/rcss/main/install.sh | sh
 ```
 
 Downloads the latest release for your OS/CPU, verifies it against
@@ -55,7 +55,7 @@ upgrade.
 ### Install script (Windows, PowerShell)
 
 ```powershell
-irm https://raw.githubusercontent.com/dougmb/RCSS-tui/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/dougmb/rcss/main/install.ps1 | iex
 ```
 
 Installs `rcss.exe` to `%LOCALAPPDATA%\Programs\rcss` and adds it to your user
@@ -66,7 +66,7 @@ Installs `rcss.exe` to `%LOCALAPPDATA%\Programs\rcss` and adds it to your user
 | Platform              | Command                                              |
 | --------------------- | ---------------------------------------------------- |
 | Arch Linux (AUR)      | `yay -S rcss-bin` (prebuilt) or `yay -S rcss` (source) |
-| Debian / Ubuntu       | download the `.deb` from [Releases](https://github.com/dougmb/RCSS-tui/releases), then `sudo apt install ./rcss_*.deb` |
+| Debian / Ubuntu       | download the `.deb` from [Releases](https://github.com/dougmb/rcss/releases), then `sudo apt install ./rcss_*.deb` |
 | Fedora / openSUSE     | download the `.rpm`, then `sudo dnf install ./rcss_*.rpm` |
 | Alpine                | download the `.apk`, then `sudo apk add --allow-untrusted ./rcss_*.apk` |
 | macOS / Linux (Homebrew) | `brew install --cask dougmb/tap/rcss`            |
@@ -75,7 +75,7 @@ Installs `rcss.exe` to `%LOCALAPPDATA%\Programs\rcss` and adds it to your user
 ### With Go
 
 ```bash
-go install github.com/dougmb/rcss-tui/cmd/rcss@latest   # installs to $(go env GOPATH)/bin
+go install github.com/dougmb/rcss/cmd/rcss@latest   # installs to $(go env GOPATH)/bin
 ```
 
 Make sure `$(go env GOPATH)/bin` is on your `PATH`.
@@ -83,8 +83,8 @@ Make sure `$(go env GOPATH)/bin` is on your `PATH`.
 ### From source
 
 ```bash
-git clone https://github.com/dougmb/RCSS-tui.git
-cd RCSS-tui
+git clone https://github.com/dougmb/rcss.git
+cd rcss
 go build -o ~/.local/bin/rcss ./cmd/rcss
 ```
 

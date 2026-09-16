@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dougmb/rcss-tui/config"
+	"github.com/dougmb/rcss/config"
 )
 
 // TestFormatExcludes checks the mapping from user tokens/patterns to rclone

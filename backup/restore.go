@@ -9,8 +9,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/dougmb/rcss-tui/config"
-	"github.com/dougmb/rcss-tui/rclone"
+	"github.com/dougmb/rcss/config"
+	"github.com/dougmb/rcss/rclone"
 )
 
 // RemoteEntry is one item in a remote listing: a folder or a file.

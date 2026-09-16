@@ -10,8 +10,8 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
-	"github.com/dougmb/rcss-tui/config"
-	"github.com/dougmb/rcss-tui/scheduler"
+	"github.com/dougmb/rcss/config"
+	"github.com/dougmb/rcss/scheduler"
 )
 
 // Schedule screen: a single interactive window that registers RCSS jobs with the

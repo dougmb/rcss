@@ -17,10 +17,10 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/dougmb/rcss-tui/backup"
-	"github.com/dougmb/rcss-tui/config"
-	"github.com/dougmb/rcss-tui/rclone"
-	"github.com/dougmb/rcss-tui/tui"
+	"github.com/dougmb/rcss/backup"
+	"github.com/dougmb/rcss/config"
+	"github.com/dougmb/rcss/rclone"
+	"github.com/dougmb/rcss/tui"
 )
 
 func main() {

@@ -7,7 +7,7 @@ import (
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/dougmb/rcss-tui/config"
+	"github.com/dougmb/rcss/config"
 )
 
 // Logs screen: a scrollable viewport over the sync log with ERROR/WARN lines

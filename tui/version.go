@@ -3,7 +3,7 @@ package tui
 import "runtime/debug"
 
 // version is the RCSS build version. It defaults to "dev" and can be set at
-// build time with -ldflags "-X github.com/dougmb/rcss-tui/tui.version=v1.2.3".
+// build time with -ldflags "-X github.com/dougmb/rcss/tui.version=v1.2.3".
 var version = "dev"
 
 // Version returns the build version, for `rcss version`.

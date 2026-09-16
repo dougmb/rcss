@@ -8,7 +8,7 @@ RCSS-tui is a pure-Go Bubbletea TUI + headless CLI for per-project backups via t
 
 - `rclone` is the only runtime dependency; credentials stay in rclone's own config.
 - The original Bash scripts live in the separate `dougmb/RCSS` repo, **not here**.
-- Module path: `github.com/dougmb/rcss-tui`; Go version in `go.mod`.
+- Module path: `github.com/dougmb/rcss`; Go version in `go.mod`.
 
 ## Build / verify
 

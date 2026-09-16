@@ -34,7 +34,7 @@ builds:
       - -trimpath
     ldflags:
       - -s -w
-      - -X github.com/dougmb/rcss-tui/tui.version={{ .Version }}
+      - -X github.com/dougmb/rcss/tui.version={{ .Version }}
 
 archives:
   - id: rcss
@@ -64,7 +64,7 @@ nfpms:
     package_name: rcss
     file_name_template: >-
       {{ .PackageName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}
-    homepage: https://github.com/dougmb/RCSS-tui
+    homepage: https://github.com/dougmb/rcss
     maintainer: Douglas <dougmbs@gmail.com>
     description: Terminal UI and headless CLI for per-project backups to an rclone cloud remote.
     license: MIT
@@ -89,7 +89,7 @@ nfpms:
 # AUR: prebuilt binary package.
 aurs:
   - name: rcss-bin
-    homepage: https://github.com/dougmb/RCSS-tui
+    homepage: https://github.com/dougmb/rcss
     description: Terminal UI and headless CLI for per-project backups to an rclone cloud remote
     maintainers:
       - Douglas <dougmbs at gmail dot com>
@@ -114,7 +114,7 @@ aurs:
 # AUR: build-from-source package.
 aur_sources:
   - name: rcss
-    homepage: https://github.com/dougmb/RCSS-tui
+    homepage: https://github.com/dougmb/rcss
     description: Terminal UI and headless CLI for per-project backups to an rclone cloud remote
     maintainers:
       - Douglas <dougmbs at gmail dot com>
@@ -140,7 +140,7 @@ aur_sources:
       export CGO_CXXFLAGS="${CXXFLAGS}"
       export CGO_LDFLAGS="${LDFLAGS}"
       export GOFLAGS="-buildmode=pie -trimpath -mod=readonly -modcacherw"
-      go build -ldflags "-linkmode=external -X github.com/dougmb/rcss-tui/tui.version=${pkgver}" -o rcss ./cmd/rcss
+      go build -ldflags "-linkmode=external -X github.com/dougmb/rcss/tui.version=${pkgver}" -o rcss ./cmd/rcss
     package: |-
       cd "${srcdir}"/rcss-*/
       install -Dm755 "./rcss" "${pkgdir}/usr/bin/rcss"
@@ -153,7 +153,7 @@ aur_sources:
 # Homebrew (macOS/Linux): cask in dougmb/homebrew-tap.
 homebrew_casks:
   - name: rcss
-    homepage: https://github.com/dougmb/RCSS-tui
+    homepage: https://github.com/dougmb/rcss
     description: Terminal UI and headless CLI for per-project backups to an rclone cloud remote
     license: MIT
     binaries:
@@ -178,7 +178,7 @@ homebrew_casks:
 # Scoop (Windows): manifest in dougmb/scoop-bucket.
 scoops:
   - name: rcss
-    homepage: https://github.com/dougmb/RCSS-tui
+    homepage: https://github.com/dougmb/rcss
     description: Terminal UI and headless CLI for per-project backups to an rclone cloud remote
     license: MIT
     depends:
