@@ -2,7 +2,6 @@ package tui
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -381,15 +380,21 @@ func (s scheduleModel) orphanCount() int {
 
 // apply registers the enabled jobs with the OS scheduler.
 func (s scheduleModel) apply() error {
-	exe, err := os.Executable()
-	if err != nil {
-		return fmt.Errorf("locating rcss binary: %w", err)
+	jobs := s.buildJobs()
+	// Removing every job needs no binary, so a `go run` session can still clear
+	// its schedule; installing jobs requires a stable, installed rcss.
+	var exe string
+	if len(jobs) > 0 {
+		var err error
+		if exe, err = scheduler.Executable(); err != nil {
+			return fmt.Errorf("locating rcss binary: %w", err)
+		}
 	}
 	logPath, err := s.cfg.ResolveLogFile()
 	if err != nil {
 		return err
 	}
-	return scheduler.Apply(s.cfg.RemoteName, s.buildJobs(), exe, logPath)
+	return scheduler.Apply(s.cfg.RemoteName, jobs, exe, logPath)
 }
 
 // save commits any typed time, applies the schedule, and flips to the done
